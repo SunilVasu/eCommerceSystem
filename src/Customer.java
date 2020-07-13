@@ -5,63 +5,10 @@ import java.util.List;
 public abstract class Customer{
 	protected String custId; //email id
 	protected String phone;
-	protected List<Order> orders;
 	protected ShoppingCart shoppingCart;
+	
 	public String get_custId(){
 		return custId;
-	}
-	public void add_to_cart(Item item, int quant){
-		if(item.get_quantity() <= 0){
-			System.out.println("Sorry the item selected is currently out of stock");
-		}
-		else{			
-			Item cartItem = new Item(item.get_prod_name(), item.get_unit_price(), quant, item.get_supplier(), last_cart_item()+1);
-			shoppingCart.addItem(cartItem);
-		}
-		
-	}
-	public void remove_from_cart(int itemId){
-		shoppingCart.removeItem(itemId);
-	}
-	private int last_cart_item(){
-		return shoppingCart.last_item();
-	}
-	public List<Item> view_cart(){
-		System.out.println("\n\n..........Your Cart.............");
-		List<Item> items = shoppingCart.viewItems();
-		for(Item item:items){
-			System.out.println(""+item.productName+":   "+item.unitPrice+"$");
-			System.out.println("   		(Supplier: "+(item.supplierId.charAt(0)=='U'?"YoLetsShop.com":eCommerceSystem.get_supplier_name(item.supplierId))+"  Quantity: "+item.quantity);
-		}
-		System.out.println("                  Total Amount:"+shoppingCart.calculate_total_price());
-		System.out.println("......................................");
-		return items;		
-	}
-	public List<Order> view_orders(){
-		System.out.println("\n\n..........Your Orders.............");
-		
-		for(Order order:orders){
-			System.out.println("__________________________________________");
-			System.out.println("Order ID:"+order.get_orderId()+"  Total: "+order.calculate_total_price()+"  Status: "+order.get_order_status());
-			
-			List<Item> items = order.viewItems();
-			for(Item item:items){
-				System.out.println(""+item.productName+":   "+item.unitPrice+"$");
-				System.out.println("   		(Supplier: "+(item.supplierId.charAt(0)=='U'?"YoLetsShop.com":eCommerceSystem.get_supplier_name(item.supplierId))+"  Quantity: "+item.quantity);
-			}
-			System.out.println("________________________________________________");
-		}
-		System.out.println("......................................");
-		return orders;	
-	}
-	public List<Order> get_orders()
-	{
-		return orders;
-	}
-	protected int last_order(){
-		if(orders.size() == 0)
-			return 0;
-		return orders.get(orders.size()-1).get_orderId();
 	}
 	
 	//@Requires("shoppingCart.items.size() != 0")
@@ -71,6 +18,7 @@ public abstract class Customer{
 }
 
 class GuestCustomer extends Customer{
+	ArrayList<Order> orders = new ArrayList<Order>();
 	
 	public GuestCustomer(String _custId, String _phone){
 		orders = new ArrayList<Order>();
@@ -80,15 +28,16 @@ class GuestCustomer extends Customer{
 	}
 	public void place_order(OrderType orderType, String storeId)
 	{
+		Order o = new Order();
 		//get the shipping details from user
 		ShippingInfo shippingInfo = new ShippingInfo("street 1", "682314", "1234567892", "deliverto@gmail.com");
 				
 		if(orderType == OrderType.ShipToCustomer){
-			ShipToCustomer order = new ShipToCustomer(custId,last_order()+1, OrderStatus.ShippingOrderPlaced, shoppingCart.viewItems(), shippingInfo);
+			ShipToCustomer order = new ShipToCustomer(custId,o.last_order()+1, OrderStatus.ShippingOrderPlaced, shoppingCart.viewItems(), shippingInfo);
 			orders.add(order);
 		}
 		else if(orderType == OrderType.StorePickup){
-			StorePickup order = new StorePickup(custId,last_order()+1, OrderStatus.PickupOrderPlaced, shoppingCart.viewItems(), storeId);
+			StorePickup order = new StorePickup(custId,o.last_order()+1, OrderStatus.PickupOrderPlaced, shoppingCart.viewItems(), storeId);
 			orders.add(order);
 		}
 		eCommerceSystem.add_Guest(this);
@@ -101,6 +50,7 @@ class PrivCustomer extends Customer{
 	String custName;
 	String password;
 	ShippingInfo shippingDetails;
+	ArrayList<Order> orders = new ArrayList<Order>();
 	
 	public PrivCustomer(String _custId, String _phone, String _custName, String _password, ShippingInfo _shippingDetails){
 		orders = new ArrayList<Order>();
@@ -130,16 +80,17 @@ class PrivCustomer extends Customer{
 	}
 	public void place_order(OrderType orderType, String storeId)
 	{
+		Order o = new Order();
 		if(shoppingCart.viewItems().isEmpty()){
 			System.out.println("There are no items selected in your cart");
 			return;
 		}
 		if(orderType == OrderType.ShipToCustomer){
-			ShipToCustomer order = new ShipToCustomer(custId,last_order()+1, OrderStatus.ShippingOrderPlaced, shoppingCart.viewItems(), shippingDetails);
+			ShipToCustomer order = new ShipToCustomer(custId,o.last_order()+1, OrderStatus.ShippingOrderPlaced, shoppingCart.viewItems(), shippingDetails);
 			orders.add(order);
 		}
 		else if(orderType == OrderType.StorePickup){
-			StorePickup order = new StorePickup(custId,last_order()+1, OrderStatus.PickupOrderPlaced, shoppingCart.viewItems(), storeId);
+			StorePickup order = new StorePickup(custId,o.last_order()+1, OrderStatus.PickupOrderPlaced, shoppingCart.viewItems(), storeId);
 			orders.add(order);
 		}
 		shoppingCart = new ShoppingCart();
@@ -151,6 +102,34 @@ class ShoppingCart{
 	
 	public ShoppingCart(){
 		items = new ArrayList<Item>();
+	}
+	
+	public void add_to_cart(Item item, int quant){
+		if(item.get_quantity() <= 0){
+			System.out.println("Sorry the item selected is currently out of stock");
+		}
+		else{			
+			Item cartItem = new Item(item.get_prod_name(), item.get_unit_price(), quant, item.get_supplier(), last_cart_item()+1);
+			addItem(cartItem);
+		}
+		
+	}
+	public void remove_from_cart(int itemId){
+		removeItem(itemId);
+	}
+	private int last_cart_item(){
+		return last_item();
+	}
+	public List<Item> view_cart(){
+		System.out.println("\n\n..........Your Cart.............");
+		List<Item> items = viewItems();
+		for(Item item:items){
+			System.out.println(""+item.productName+":   "+item.unitPrice+"$");
+			System.out.println("   		(Supplier: "+(item.supplierId.charAt(0)=='U'?"YoLetsShop.com":eCommerceSystem.get_supplier_name(item.supplierId))+"  Quantity: "+item.quantity);
+		}
+		System.out.println("                  Total Amount:"+calculate_total_price());
+		System.out.println("......................................");
+		return items;		
 	}
 	
 	//@Requires("item.quantity > 0")

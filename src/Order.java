@@ -1,5 +1,6 @@
 import java.util.Date;
 import java.util.List;
+import Customer.Item;
 
 enum OrderType{
 	ShipToCustomer,
@@ -25,6 +26,7 @@ public class Order{
 	protected Date orderDate;
 	protected OrderStatus orderStatus;	
 	protected List<Item> items;
+	protected List<Order> orden;
 	public void update_order_status(OrderStatus status){
 		orderStatus = status;
 	}
@@ -49,6 +51,35 @@ public class Order{
 		total = (double) Math.round(total * 100) / 100;
 		return total;
 	}
+	
+	public List<Order> view_orders(){
+		System.out.println("\n\n..........Your Orders.............");
+		
+		for(Order order:orden){
+			System.out.println("__________________________________________");
+			System.out.println("Order ID:"+order.get_orderId()+"  Total: "+order.calculate_total_price()+"  Status: "+order.get_order_status());
+			
+			List<Item> items = order.viewItems();
+			for(Item item:items){
+				System.out.println(""+item.productName+":   "+item.unitPrice+"$");
+				System.out.println("   		(Supplier: "+(item.supplierId.charAt(0)=='U'?"YoLetsShop.com":eCommerceSystem.get_supplier_name(item.supplierId))+"  Quantity: "+item.quantity);
+			}
+			System.out.println("________________________________________________");
+		}
+		System.out.println("......................................");
+		return orden;	
+	}
+	
+	public List<Order> get_orders()
+	{
+		return orden;
+	}
+	protected int last_order(){
+		if(orden.size() == 0)
+			return 0;
+		return orden.get(orden.size()-1).get_orderId();
+	}
+	
 }
 
 //@Invariant("!String.isNullOrEmpty(storeUnit)")
@@ -83,6 +114,11 @@ class ShipToCustomer extends Order{
 		shippingDetails = _shippingDetails;
 	}
 }
+
+
+
+
+
 //@Invariant("!String.isNullOrEmpty(addr1)","!String.isNullOrEmpty(pin)", "!String.isNullOrEmpty(phone)")
 class ShippingInfo{
 	String addr1;
@@ -95,5 +131,6 @@ class ShippingInfo{
 		phone = _phone;
 		email = _email;
 	}
+	
 }
 
