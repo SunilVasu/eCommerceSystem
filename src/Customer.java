@@ -134,14 +134,16 @@ class PrivCustomer extends Customer{
 			System.out.println("There are no items selected in your cart");
 			return;
 		}
+		Order order;
 		if(orderType == OrderType.ShipToCustomer){
-			ShipToCustomer order = new ShipToCustomer(custId,last_order()+1, OrderStatus.ShippingOrderPlaced, shoppingCart.viewItems(), shippingDetails);
-			orders.add(order);
+			order = new ShipToCustomer(custId,last_order()+1, OrderStatus.ShippingOrderPlaced, shoppingCart.viewItems(), shippingDetails);
+			
 		}
 		else if(orderType == OrderType.StorePickup){
-			StorePickup order = new StorePickup(custId,last_order()+1, OrderStatus.PickupOrderPlaced, shoppingCart.viewItems(), storeId);
-			orders.add(order);
+			order = new StorePickup(custId,last_order()+1, OrderStatus.PickupOrderPlaced, shoppingCart.viewItems(), storeId);
+			
 		}
+		orders.add(order);
 		shoppingCart = new ShoppingCart();
 	}
 	
