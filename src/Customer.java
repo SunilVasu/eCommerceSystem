@@ -15,7 +15,7 @@ public abstract class Customer{
 			System.out.println("Sorry the item selected is currently out of stock");
 		}
 		else{			
-			Item cartItem = new Item(item.get_prod_name(), item.get_unit_price(), quant, item.get_supplier(), last_cart_item()+1);
+			Item cartItem = new Item(item, quant);
 			shoppingCart.addItem(cartItem);
 		}
 		
@@ -199,6 +199,7 @@ class Item{
 	{
 		return unitPrice * quantity;
 	}
+	
 	public Item(String _productName, double _unitPrice, int _quantity, String _supplierId, int _productId){
 		itemId = _productId;
 		productName = _productName;
@@ -206,6 +207,11 @@ class Item{
 		quantity = _quantity;
 		supplierId = _supplierId;
 	}
+	
+	public Item(Item i, int quant){
+		this(i.prodctName, i.unitPrice, quant, i.supplierId, i.itemId+1);
+	}
+	
 	public int get_quantity(){
 		return quantity;
 	}
