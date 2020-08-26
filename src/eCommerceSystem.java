@@ -3,11 +3,26 @@ import java.util.Date;
 import java.util.List;
 
 
-public class eCommerceSystem{
+public abstract class eCommerceSystem implements SupportTeam{
 	protected static List<Customer> customers = new ArrayList<Customer>();
 	protected static List<ExternalVendors> vendors = new ArrayList<ExternalVendors>();
 	//protected static List<Order> orders = new ArrayList<Order>();
 	protected static Catalog catalog = new Catalog();
+	
+	public void update_status(Order order, OrderStatus status)
+	{
+		for(Customer customer: customers){
+			if(customer.get_custId() == order.get_custId()){
+				for(Order ordr:customer.get_orders()){
+					if(ordr.get_orderId() == order.get_orderId())
+					{
+						ordr.update_order_status(status);
+						break;
+					}
+				}
+			}
+		}
+	}
 	
 	//@Requires("guest.orders.size() > 0")
 	//@Ensures("customers.size() == old(customers.size)+1")
@@ -60,7 +75,7 @@ interface SupportTeam{
 	boolean checkCredentials(String id, String pwd);
 }
 //@Invariant({"!String.isNullOrEmpty(userId)", "!String.isNullOrEmpty(password)"})
-class SalesTeam extends eCommerceSystem implements SupportTeam{
+class SalesTeam extends eCommerceSystem {
 	String userId;
 	String password;
 	public SalesTeam(String _userId, String _password){
@@ -88,20 +103,7 @@ class SalesTeam extends eCommerceSystem implements SupportTeam{
 		}
 		return orders;
 	}
-	public void update_status(Order order, OrderStatus status)
-	{
-		for(Customer customer: customers){
-			if(customer.get_custId() == order.get_custId()){
-				for(Order ordr:customer.get_orders()){
-					if(ordr.get_orderId() == order.get_orderId())
-					{
-						ordr.update_order_status(status);
-						break;
-					}
-				}
-			}
-		}
-	}
+	
 	
 	public boolean checkCredentials(String id, String pwd){
 		if(userId == id && password == pwd){
@@ -112,7 +114,7 @@ class SalesTeam extends eCommerceSystem implements SupportTeam{
 	
 }
 //@Invariant({"!String.isNullOrEmpty(userId)", "!String.isNullOrEmpty(password)"})
-class ShippingTeam extends eCommerceSystem implements SupportTeam{
+class ShippingTeam extends eCommerceSystem {
 	String userId;
 	String password;
 	public ShippingTeam(String _userId, String _password){
@@ -139,22 +141,7 @@ class ShippingTeam extends eCommerceSystem implements SupportTeam{
 		}
 		return shippingOrders;
 	}
-	//@Requires("status != null","order.id in orders for all customers")
-	//@Ensures("Count(orders with orderstatus = status") = old(Count(orders with orderstatus = status")) +1)
-	public void update_status(Order order, OrderStatus status){
-		//shipping status
-		for(Customer customer: customers){
-			if(customer.get_custId() == order.get_custId()){
-				for(Order ordr:customer.get_orders()){
-					if(ordr.get_orderId() == order.get_orderId())
-					{
-						ordr.update_order_status(status);
-						break;
-					}
-				}
-			}
-		}
-	}
+	
 	public boolean checkCredentials(String id, String pwd){
 		if(userId == id && password == pwd){
 			return true;
@@ -163,7 +150,7 @@ class ShippingTeam extends eCommerceSystem implements SupportTeam{
 	}
 }
 //@Invariant({"!String.isNullOrEmpty(userId)", "!String.isNullOrEmpty(password)"})
-class ITTeam extends eCommerceSystem implements SupportTeam{
+class ITTeam extends eCommerceSystem {
 	String userId;
 	String password;
 	public ITTeam(String _userId, String _password){
@@ -203,22 +190,8 @@ class ITTeam extends eCommerceSystem implements SupportTeam{
 		}
 		return orders;
 	}
-	//@Requires("status != null","order.id in orders for all customers")
-	//@Ensures("Count(orders with orderstatus = status") = old(Count(orders with orderstatus = status")) +1)
-	public void update_status(Order order, OrderStatus status)
-	{
-		for(Customer customer: customers){
-			if(customer.get_custId() == order.get_custId()){
-				for(Order ordr:customer.get_orders()){
-					if(ordr.get_orderId() == order.get_orderId())
-					{
-						ordr.update_order_status(status);
-						break;
-					}
-				}
-			}
-		}
-	}
+	
+	
 	public boolean checkCredentials(String id, String pwd){
 		if(userId == id && password == pwd){
 			return true;
@@ -227,7 +200,7 @@ class ITTeam extends eCommerceSystem implements SupportTeam{
 	}
 }
 //@Invariant({"!String.isNullOrEmpty(unitId)", "!String.isNullOrEmpty(password)"})
-class StoreUnit extends eCommerceSystem implements SupportTeam{
+class StoreUnit extends eCommerceSystem{
 	String unitName;
 	String unitId;
 	String password;
@@ -264,6 +237,7 @@ class StoreUnit extends eCommerceSystem implements SupportTeam{
 	}
 	//@Requires("status != null","order.id in orders for all customers", "order instanceOf StorePickup","storeUnit of order = unitId")
 	//@Ensures("Count(orders with orderstatus = status") = old(Count(orders with orderstatus = status")) +1)
+	@Override
 	public void update_status(Order order, OrderStatus status){
 		for(Customer customer: customers){
 			if(customer.get_custId() == order.get_custId()){
